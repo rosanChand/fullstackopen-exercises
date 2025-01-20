@@ -6,16 +6,19 @@ const Header =({courseName})=>{
     
   )
 }
-const Content = ({p1,e1,p2,e2,p3,e3})=>{
-return (
-  <>
-  <p>{p1} {e1}</p>
-  <p>{p2} {e2}</p>
-  <p>{p3} {e3}</p>
-
-  </>
-)
+const Part = ({part,exercise})=>{
+  return <p>{part} {exercise}</p>
 }
+const Content = ({p1,e1,p2,e2,p3,e3})=>{
+  return (
+    <>
+    <Part part={p1} exercise={e1}/>
+    <Part part={p2} exercise={e2}/>
+    <Part part={p3} exercise={e3}/>
+  
+    </>
+  )
+  }
 const Footer = ({e1,e2,e3})=>{
 return <p>Number of exercises {e1 + e2 + e3}</p>
 }
