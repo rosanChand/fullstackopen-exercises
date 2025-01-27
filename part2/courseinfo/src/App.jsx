@@ -2,7 +2,8 @@ import Course from "./components/Course"
 
 
 const App = () => {
-  const course = {
+  const courses =  [
+  {
     id: 1,
     name: 'Half Stack application development',
     parts: [
@@ -20,11 +21,32 @@ const App = () => {
         name: 'State of a component',
         exercises: 14,
         id: 3
-      }
+      },
     ]
+  },
+  {
+    name: 'Node.js',
+    id: 2,
+    parts: [
+          {
+            name: 'Routing',
+            exercises: 3,
+            id: 1
+          },
+          {
+            name: 'Middlewares',
+            exercises: 7,
+            id: 2
+          }
+          ]
   }
+]
 
-  return <Course course={course} />
+  return (
+    <>
+    {courses.map((course) => (<Course course={course} />))}
+    </>
+  )
 }
 
 export default App
