@@ -2,15 +2,15 @@ import { use, useState,useEffect } from "react";
 import Person from "./components/Person";
 import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
-import axios from 'axios'
+import phonebook from "./services/phonebook";
 const App = ()=>{
     const [persons,setPersons] = useState([])
 
     useEffect(()=>{
-      axios.get('http://localhost:3001/persons')
-      .then((response)=>{
-        setPersons(response.data)
-        console.log(response.data)
+      phonebook.getAll()
+      .then((initialNotes)=>{
+        setPersons(initialNotes)
+        console.log(initialNotes)
       })
     },[])
 const [newName,setNewName] = useState('')
@@ -19,6 +19,8 @@ const [newNumber,setNewNumber] = useState('')
 const [searchName,setSearchName] = useState('')
 
 const handleNewName = (event) =>{
+  
+  
     setNewName(event.target.value)
 }
 // const chechName = ()=>{
@@ -32,8 +34,14 @@ const handleNewNumber = (event)=>{
 }
 const addNote = (event) =>{
   event.preventDefault()
-  if (persons.some(person => person.name === newName)){
-    alert(`${newName} is already added to phonebook`)
+  const obj = persons.find(person => person.name.toLowerCase() === newName.toLowerCase())
+  if (obj){
+    if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
+      const ChangedObj = {...obj,number: newNumber}
+      phonebook.update(ChangedObj.id,ChangedObj).then((returnedNumber) => {
+        setPersons(persons.map(person=> person.id == ChangedObj.id?returnedNumber:person))
+    })
+  }
     return
   }
 
@@ -41,12 +49,23 @@ const addNote = (event) =>{
     name: newName,
     number: newNumber
   }
-  setPersons(persons.concat(name))
+  phonebook.create(name)
+  .then(data => {
+  setPersons(persons.concat(data))
 
   setNewName('')
   setNewNumber('')
-
+  })
 }
+const handleDelete = (id) => {
+  if (window.confirm("Are you sure you want to delete this person?")) {
+    phonebook.remove(id).then(() => {
+      setPersons(persons.filter(person => person.id !== id));
+    });
+  }
+};
+
+
 
 
 
@@ -63,7 +82,7 @@ return (
         newNumber={newNumber}
       />
     <h2>Numbers</h2>
-    <Person persons={persons} searchName={searchName}/>
+    <Person persons={persons} searchName={searchName} handleDelete={handleDelete}/>
   </>
 )
 }

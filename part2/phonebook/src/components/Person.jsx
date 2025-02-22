@@ -1,17 +1,20 @@
-const Person = ({persons,searchName})=>{
-    if (searchName){
-        return persons.map(person => {
-          if (person.name.toLowerCase().includes(searchName.toLowerCase())){
-            return (
-            <div key= {person.name}>
-            {person.name} {person.number}
-            </div>)
-          }
-        }
-      )}  else 
-       return (
-        persons.map(person =><div key={person.name}>{person.name} {person.number}</div>)
-       )
-}
+const Person = ({ persons, searchName, handleDelete }) => {
+  const filteredPersons = searchName
+    ? persons.filter(person =>
+        person.name.toLowerCase().includes(searchName.toLowerCase())
+      )
+    : persons;
 
-export default Person
+  return (
+    <>
+      {filteredPersons.map(person => (
+        <div key={person.id}>
+          {person.name} {person.number} 
+          <button onClick={() => handleDelete(person.id)}>delete</button>
+        </div>
+      ))}
+    </>
+  );
+};
+
+export default Person;
