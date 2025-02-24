@@ -3,6 +3,7 @@ import Person from "./components/Person";
 import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
 import phonebook from "./services/phonebook";
+import Notification from "./components/Notification"
 const App = ()=>{
     const [persons,setPersons] = useState([])
 
@@ -17,6 +18,7 @@ const [newName,setNewName] = useState('')
 
 const [newNumber,setNewNumber] = useState('')
 const [searchName,setSearchName] = useState('')
+const [errorMessage,setErrorMessage] = useState(null)
 
 const handleNewName = (event) =>{
   
@@ -37,10 +39,21 @@ const addNote = (event) =>{
   const obj = persons.find(person => person.name.toLowerCase() === newName.toLowerCase())
   if (obj){
     if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
+      
       const ChangedObj = {...obj,number: newNumber}
       phonebook.update(ChangedObj.id,ChangedObj).then((returnedNumber) => {
+        setErrorMessage(`${obj.name} phone number was changed to ${newNumber}`)
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
         setPersons(persons.map(person=> person.id == ChangedObj.id?returnedNumber:person))
-    })
+    }).catch(error => {
+      
+      setErrorMessage(`Information of ${obj.name} was previously deleted.`)
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
+    });
   }
     return
   }
@@ -52,16 +65,26 @@ const addNote = (event) =>{
   phonebook.create(name)
   .then(data => {
   setPersons(persons.concat(data))
-
+  setErrorMessage(`Added ${newName}`)
+  setTimeout(() => {
+    setErrorMessage(null)
+  }, 5000)
   setNewName('')
   setNewNumber('')
   })
 }
 const handleDelete = (id) => {
   if (window.confirm("Are you sure you want to delete this person?")) {
+    
+    
     phonebook.remove(id).then(() => {
+      const test = persons.find(person => person.id == id)
+      setErrorMessage(`Deleted ${test.name}`)
+    setTimeout(() => {
+      setErrorMessage(null)
+    }, 5000)
       setPersons(persons.filter(person => person.id !== id));
-    });
+    })
   }
 };
 
@@ -73,6 +96,7 @@ const handleDelete = (id) => {
 return (
   <>
     <h2>Phonebook</h2>
+    <Notification message={errorMessage} />
     <Filter searchName={searchName} handleSearch={handleSearch}/>
     <PersonForm 
         addNote={addNote}
