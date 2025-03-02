@@ -1,7 +1,11 @@
 const express = require('express')
-
+const cors = require('cors')
 const app = express()
+
 app.use(express.json())
+app.use(cors())
+app.use(express.static('dist'))
+
 
 const morgan = require('morgan')
 app.use(morgan(function (tokens, req, res) {
@@ -38,7 +42,9 @@ let phonebook = [
     }
 ]
 
-// app.get('/',(reques))
+app.get('/',(request,response)=>{
+  response.send('<h1>connected:/</h1>')
+})
 app.get('/api/persons',(request,response)=>{
     response.json(phonebook)
 })
@@ -99,6 +105,13 @@ const namecheck = (name) =>{
   const match = phonebook.find(p => p.name == name)
   return match? true: false
 }
+app.put('/api/persons/:id',(request,response)=>{
+  const id = request.params.id
+  const updatedInfo = request.body
+  phonebook = phonebook.map(p => p.id == id?updatedInfo:p)
+  response.json(updatedInfo)
+
+})
 
 app.post('/api/persons',(request,response)=>{
   const body = request.body
@@ -125,5 +138,7 @@ app.post('/api/persons',(request,response)=>{
 
 })
 
-const PORT = 3001
-app.listen(PORT)
+const PORT = process.env.PORT || 3001
+app.listen(PORT,()=>{
+  console.log(`server running on port ${PORT}`)
+})
