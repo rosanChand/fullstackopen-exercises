@@ -48,11 +48,17 @@ const addNote = (event) =>{
       }, 5000)
         setPersons(persons.map(person=> person.id == ChangedObj.id?returnedNumber:person))
     }).catch(error => {
-      
+      if(error.name === 'ValidationError'){
+        setErrorMessage(error.response.data.error)
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000)
+      } else {
       setErrorMessage(`Information of ${obj.name} was previously deleted.`)
       setTimeout(() => {
         setErrorMessage(null)
       }, 5000)
+    }
     });
   }
     return
@@ -71,6 +77,12 @@ const addNote = (event) =>{
   }, 5000)
   setNewName('')
   setNewNumber('')
+  })
+  .catch(error => {
+    setErrorMessage(error.response.data.error)
+  setTimeout(() => {
+    setErrorMessage(null)
+  }, 5000)
   })
 }
 const handleDelete = (id) => {
