@@ -3,17 +3,21 @@ const Blog = require('../models/blog')
 
 
 
-blogsRouter.get('/', (request, response) => {
-  Blog
-    .find({})
-    .then(blogs => {
-      response.json(blogs)
-    })
+blogsRouter.get('/', async (request, response) => {
+  const blogs = await Blog.find({})
+  return response.json(blogs)
+  // Blog
+  //   .find({})
+  //   .then(blogs => {
+  //     response.json(blogs)
+  //   })
 })
 
 blogsRouter.post('/', (request, response,next) => {
   const blog = new Blog(request.body)
-
+  if (!blog.title || ! blog.url){
+    response.status(400).end()
+  }
   blog
     .save()
     .then(result => {
