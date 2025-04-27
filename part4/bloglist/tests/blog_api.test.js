@@ -195,5 +195,7 @@ describe('put request',() => {
 
 
 after(async () => {
+  await User.deleteMany({}) // Clear all users after each test
+  await Blog.deleteMany({}) 
   await mongoose.connection.close()
 })

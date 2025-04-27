@@ -15,6 +15,9 @@ const bcrypt = require('bcrypt')
 describe('user creation',() => {
   beforeEach(async () => {
     await User.deleteMany({})
+    console.log('Database cleared')
+    const usersAtStart = await helper.userInDb()
+    console.log('users',usersAtStart)
 
     const passwordHash = await bcrypt.hash('secret',10)
     const user = new User({
@@ -31,7 +34,7 @@ describe('user creation',() => {
 
     const newUser = {
       username:'roshan',
-      namee: 'Roshan Chand',
+      name: 'Roshan Chand',
       password: 'something'
     }
 
@@ -51,7 +54,7 @@ describe('user creation',() => {
 
     const newUser = {
       username:'ro',
-      namee: 'Roshan Chand',
+      name: 'Roshan Chand',
       password: 'something'
     }
 
@@ -93,4 +96,5 @@ describe('user creation',() => {
 
 after(async () => {
   mongoose.connection.close()
+  
 })
