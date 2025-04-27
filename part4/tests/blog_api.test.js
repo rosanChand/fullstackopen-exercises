@@ -8,17 +8,34 @@ const supertest = require('supertest')
 const app = require('../app')
 const helper = require('./test_helper')
 const Blog = require('../models/blog')
+const User = require('../models/user')
+const jwt = require('jsonwebtoken')
+const bcrypt = require('bcrypt')
 
 const api = supertest(app)
 
-beforeEach(async () => {
-  await Blog.deleteMany({})
 
-  await Blog.insertMany(helper.initialBlogs)
+beforeEach(async () => {
+
+  await User.deleteMany({})
+  await Blog.deleteMany({})
+  const passwordHash = await bcrypt.hash('password', 10)
+  const user = new User({ username: 'root', name: 'root', passwordHash })
+  await user.save()
+
+  // const noteObjects = helper.intialblogs.map(blog => new Blog(blog))
+  const blogObjects = helper.initialBlogs.map(blog => new Blog({
+    ...blog,
+    user: user._id
+  }))
+  await Blog.insertMany(blogObjects)
 })
 
 describe('get requests', () => {
+  
+
   test('returned as json', async () => {
+   
     await api
       .get('/api/blogs')
       .expect(200)
@@ -41,6 +58,20 @@ describe('id', () => {
 })
 
 describe('post requests', () => {
+  let headers
+  beforeEach(async () => {
+    const newUser = {
+      username: 'root',
+      password: 'password',
+    }
+    const result = await api
+      .post('/api/login')
+      .send(newUser)
+
+      headers = {
+        'Authorization': `Bearer ${result.body.token}`
+      }
+  })
   test('a new blog can be added',async () => {
     const newBlog = {
       title: 'something',
@@ -51,6 +82,7 @@ describe('post requests', () => {
   
     await api
       .post('/api/blogs')
+      .set(headers)
       .send(newBlog)
       .expect(201)
       .expect('content-Type',/application\/json/)
@@ -73,6 +105,7 @@ describe('post requests', () => {
   
     await api
       .post('/api/blogs')
+      .set(headers)
       .send(newBlog)
       .expect(201)
       .expect('content-Type',/application\/json/)
@@ -93,6 +126,7 @@ describe('post requests', () => {
   
     await api
       .post('/api/blogs')
+      .set(headers)
       .send(newBlog)
       .expect(400) 
   })
@@ -102,6 +136,20 @@ describe('post requests', () => {
 })
 
 describe('delete request',() => {
+  let headers
+  beforeEach(async () => {
+    const newUser = {
+      username: 'root',
+      password: 'password',
+    }
+    const result = await api
+      .post('/api/login')
+      .send(newUser)
+
+      headers = {
+        'Authorization': `Bearer ${result.body.token}`
+      }
+  })
   test('a blog can be deleted', async () => {
    
       const blogsAtStart = await helper.blogsInDb()
@@ -109,6 +157,7 @@ describe('delete request',() => {
     
       await api
         .delete(`/api/blogs/${blogToDelete.id}`)
+        .set(headers)
         .expect(204)
     
       const blogsAtEnd = await helper.blogsInDb()
