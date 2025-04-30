@@ -1,18 +1,21 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Blog from './components/Blog'
 import Notification from './components/Notification'
 import blogService from './services/blogs'
 import loginService from './services/login'
+import BlogForm from './components/BlogForm'
+import Togglable from './components/Togglable'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
-  const [newBlog,setNewBlog] = useState({})
 
   const [errorMessage, setErrorMessage] = useState(null)
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user,setUser] = useState(null)
+
+  const blogFormRef = useRef()
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -70,42 +73,25 @@ const loginForm = () => (
       <input type="submit" value="login"/>
       </form>
 )
-const handleInputChange = (event) => {
-  const { name, value } = event.target
-  setNewBlog({ ...newBlog, [name]: value })
-}
+
 
 const blogForm = () => {
   return (
-    <>
-    <h2>create new</h2>
-    <form onSubmit={addBlog}>
-      <div>
-        Title
-        <input type="text" name="title" value={newBlog.title} onChange={handleInputChange} />
-      </div>
-      <div>
-        Author
-        <input type="text" name="author" value={newBlog.author} onChange={handleInputChange} />
-      </div>
-      <div>
-        Url
-        <input type="text" name="url" value={newBlog.url} onChange={handleInputChange} />
-      </div>
-      <button type="submit">save</button>
-    </form>
-    </>
+    <Togglable buttonLabel='new blog' ref={blogFormRef}>
+      <BlogForm
+        createBlog={addBlog}
+        />
+    </Togglable>
   )
 }
-const addBlog = async (event) => {
-  event.preventDefault()
+const addBlog = async (blogObject) => {
+  
   try{
-    const blogObject = {
-      ...newBlog
-  }
+    
+  blogFormRef.current.toggleVisibility()
   const returnedBlog = await blogService.create(blogObject)
   setBlogs(blogs.concat(returnedBlog))
-  setNewBlog({})
+ 
   setErrorMessage(`a new blog ${returnedBlog.title} by ${returnedBlog.author} added`)
   setTimeout(() => {
     setErrorMessage(null)
@@ -116,6 +102,19 @@ const addBlog = async (event) => {
       setErrorMessage(null)
     }, 5000)
   }
+}
+
+const handleLike = async (blogObject) => {
+  const updatedBlog = {
+    ...blogObject, likes : blogObject.likes + 1
+  }
+  const id = updatedBlog.id
+  const newBlog = await blogService.update(id,updatedBlog)
+  setBlogs(blogs.map(blog => blog.id === newBlog.id? {...blog, likes: newBlog.likes} : blog))
+}
+const handleDelete = async (blogObject) => {
+  await blogService.remove(blogObject.id)
+  setBlogs(blogs.filter(blog => blog.id !== blogObject.id))
 }
 
 if (user === null) {
@@ -139,8 +138,13 @@ if (user === null) {
         logout
         </button></p>
       {blogForm()}
-      {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} />
+      {blogs
+      .slice()
+      .sort((a,b) => b.likes - a.likes)
+      .map(blog =>
+        <Blog key={blog.id} blog={blog} handleLike={() => {
+          handleLike(blog)
+        }}  handleDelete={() => {handleDelete(blog)}}/>
       )}
     </div>
   )
