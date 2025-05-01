@@ -19,9 +19,6 @@ const create = (blogObject) => {
 }
 
 const update = (id, blogObject) => {
-  const config = {
-    headers: {Authorization: token}
-  }
   const request = axios.put(`${baseUrl}/${id}`,blogObject)
     return request.then(response => response.data)
 }
@@ -31,6 +28,7 @@ const remove = (id) => {
     headers: {Authorization: token}
   }
   const request = axios.delete(`${baseUrl}/${id}`,config)
+  return request.then(response => response.data)
 }
 
 export default { getAll,create,setToken, update,remove }
