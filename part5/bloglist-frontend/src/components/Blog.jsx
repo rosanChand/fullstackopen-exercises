@@ -1,6 +1,6 @@
 import { useState } from "react"
 import PropTypes from 'prop-types'
-const Blog = ({ blog, handleLike,handleDelete }) => {
+const Blog = ({ blog, handleLike,handleDelete,currentUser }) => {
   const [visible,setVisible] = useState(false)
 
   const blogStyle = {
@@ -13,12 +13,13 @@ const Blog = ({ blog, handleLike,handleDelete }) => {
   const toggleVisibility = () => {
     setVisible(!visible);
   };
+  const isowner = blog.user.username === currentUser.username
 
   const hideWhenVisible = {display: visible? 'none': ''}
   const showWhenVisible = {display: visible? '' : 'none'}
   
   return (
-  <div style={blogStyle}>
+  <div style={blogStyle} className="blogt">
     <div style={hideWhenVisible} className="blog-test">
     {blog.title} {blog.author} <button onClick={toggleVisibility}>
       view
@@ -31,10 +32,11 @@ const Blog = ({ blog, handleLike,handleDelete }) => {
     </button>
     
       <br />{blog.url}
-      <br />likes {blog.likes} <button onClick={handleLike}>like</button>
+      <br /><span className="likes">likes {blog.likes} </span><button onClick={handleLike}>like</button>
       <br />{blog.user.name}
+      {(isowner) &&
       <button onClick={handleDelete}>remove</button>
-    
+      }
     </div>
   </div>  
   )

@@ -55,6 +55,7 @@ const loginForm = () => (
         <div>
           Username
           <input
+            data-testid='username'
             type='text'
             value={username}
             name='username'
@@ -64,6 +65,7 @@ const loginForm = () => (
         <div>
           Password
           <input 
+          data-testid='password'
           type='password'
           value={password}
           name='Password'
@@ -113,6 +115,7 @@ const handleLike = async (blogObject) => {
   setBlogs(blogs.map(blog => blog.id === newBlog.id? {...blog, likes: newBlog.likes} : blog))
 }
 const handleDelete = async (blogObject) => {
+
   await blogService.remove(blogObject.id)
   setBlogs(blogs.filter(blog => blog.id !== blogObject.id))
 }
@@ -120,7 +123,8 @@ const handleDelete = async (blogObject) => {
 if (user === null) {
   return (
     <div>
-      <h2>Log in to application</h2>
+      <h2>Blogs</h2>
+      <h3>Log in to application</h3>
       <Notification message={errorMessage} />
       {loginForm()}
     </div>
@@ -129,7 +133,7 @@ if (user === null) {
 
   return (
     <div>
-      <h2>blogs</h2>
+      <h2>Blogs</h2>
       <Notification message={errorMessage} />
       <p>{user.name} logged in <button onClick={() => {window.localStorage.removeItem('loggedBlogAppUser')
         setUser(null)
@@ -144,7 +148,7 @@ if (user === null) {
       .map(blog =>
         <Blog key={blog.id} blog={blog} handleLike={() => {
           handleLike(blog)
-        }}  handleDelete={() => {handleDelete(blog)}}/>
+        }}  handleDelete={() => {handleDelete(blog)}} currentUser={user}/>
       )}
     </div>
   )
