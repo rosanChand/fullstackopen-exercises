@@ -1,63 +1,83 @@
-import { useState } from "react";
-import PropTypes from "prop-types";
-const BlogForm = ({ createBlog }) => {
-  const [newBlog, setNewBlog] = useState("");
+import { useState,useRef } from "react";
 
-  const addBlog = (event) => {
-    event.preventDefault();
+import { useDispatch } from "react-redux";
+import Togglable from "./Togglable";
+import { createBlog } from "../reducers/blogReducer";
+import { setNotification } from "../reducers/notificationReducer";
+import {Form,Button} from "react-bootstrap"
+const BlogForm = () => {
+  const [newBlog, setNewBlog] = useState("");
+  const dispatch = useDispatch();
+
+  const blogFormRef = useRef();
+    const addBlog = async (event) => {
+       event.preventDefault();
     const blogObject = {
       ...newBlog,
     };
-    createBlog(blogObject);
 
     setNewBlog({});
+    try {
+      blogFormRef.current.toggleVisibility();
+      // const returnedBlog = await blogService.create(blogObject);
+      // setBlogs((blogs) => blogs.concat(returnedBlog));
+      dispatch(createBlog(blogObject));
+
+      
+      dispatch(setNotification(`a new blog ${returnedBlog.title} by ${returnedBlog.author} added`))
+      
+    } catch (exception) {
+      dispatch(setNotification("error creating blog"));
+      // setErrorMessage("error creating blog");
+      // setTimeout(() => {
+      //   setErrorMessage(null);
+      // }, 5000);
+    }
   };
+
+
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     setNewBlog({ ...newBlog, [name]: value });
   };
   return (
     <>
+    <Togglable buttonLabel="new blog" ref={blogFormRef}>
       <h2>create new</h2>
-      <form id="form" onSubmit={addBlog}>
-        <div>
-          Title
-          <input
-            id="title"
-            type="text"
-            name="title"
-            value={newBlog.title}
-            onChange={handleInputChange}
-          />
-        </div>
-        <div>
-          Author
-          <input
-            id="author"
-            type="text"
-            name="author"
-            value={newBlog.author}
-            onChange={handleInputChange}
-          />
-        </div>
-        <div>
-          Url
-          <input
-            id="url"
-            type="text"
-            name="url"
-            value={newBlog.url}
-            onChange={handleInputChange}
-          />
-        </div>
-        <button id="send" type="submit">
-          save
-        </button>
-      </form>
+      <Form id="form" onSubmit={addBlog}>
+         <Form.Group>
+                    <Form.Label>Title:</Form.Label>
+                    <Form.Control
+                        id="title"
+                        type="text"
+                        value={newBlog.title}
+                        name="title"
+                        onChange={handleInputChange} />
+                </Form.Group>
+                <Form.Group>
+                    <Form.Label>Author:</Form.Label>
+                    <Form.Control
+                        id="author"
+                        type="text"
+                        value={newBlog.author}
+                        name="title"
+                        onChange={handleInputChange} />
+                </Form.Group>
+                <Form.Group>
+                    <Form.Label>URL:</Form.Label>
+                    <Form.Control
+                        id="url"
+                        type="text"
+                        value={newBlog.url}
+                        name="url"
+                        onChange={handleInputChange} />
+                </Form.Group>
+     
+        <Button variant="primary" type="submit">save</Button>
+      </Form>
+      </Togglable>
     </>
   );
 };
-BlogForm.propTypes = {
-  createBlog: PropTypes.func.isRequired,
-};
+
 export default BlogForm;
